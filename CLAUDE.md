@@ -24,30 +24,34 @@ This is a React 19 SPA frontend that connects to a Spring Boot backend at `http:
 **Tech stack:** React 19, React Router v7, Zustand 5, Axios
 
 **API base URL** is configured via environment variables:
-- `.env.development`: `REACT_APP_API_BASE_URL=http://localhost:8080`
-- `.env.production`: update with production server IP
+- `.env.development`: `http://localhost:8080`
+- `.env.production`: `http://54.116.190.160:8080`
 
 ## Code Organization
 
 ### `src/api/`
 - `Http.jsx` — Axios instance configured with `baseURL` from env and `withCredentials: true`
-- `Auth.jsx` — Auth API calls (`register`, `login`, `logout`) plus Axios request/response interceptors
+- `Auth.jsx` — Auth API calls (`register`, `login`, `logout`, `myPage`, `deleteMember`, `updateMember`) plus Axios request/response interceptors
+- `GuestBook.jsx` — Guestbook API calls (CRUD operations)
 
-**JWT auth flow:** Login response returns `{accessToken, refreshToken, membersVO}`, stored in localStorage under key `tokens`. The request interceptor in `Auth.jsx` reads from localStorage and injects `Authorization: Bearer <token>` for all requests except whitelisted paths.
+**JWT auth flow:** Login response returns `{accessToken, refreshToken, user}`, stored in localStorage under key `tokens`. The request interceptor in `Auth.jsx` injects `Authorization: Bearer <token>` for all requests except `/members/login`, `/members/register`, and `/members/refresh`. The response interceptor handles 401 errors by refreshing the token and retrying failed requests.
 
 ### `src/store/`
-Three Zustand stores:
-- `useAuthStore.jsx` — `user`, `isLoggedIn` state; `zu_login()`, `zu_logout()` actions (no persistence)
+Four Zustand stores:
+- `useAuthStore.jsx` — `user`, `isLoggedIn` state; `zu_login()`, `zu_logout()` actions (no persistence, tokens managed directly in localStorage)
 - `useTodoStore.jsx` — Todo CRUD, persisted to localStorage key `todo-storage`
-- `useMemoStroe.jsx` — Memo CRUD, persisted to localStorage key `memo-storage` (note: filename has typo "Stroe")
+- `useMemoStroe.jsx` — Memo CRUD, persisted to localStorage key `memo-storage` (note: filename typo "Stroe")
+- `useGuestbookStore.jsx` — Guestbook state (no persistence, data fetched from backend)
+
+### `src/components/`
+- `PrivateRoute.jsx` — Route guard component that checks `isLoggedIn` (Zustand) OR presence of `tokens` in localStorage; redirects to `/login` if unauthorized
 
 ### `src/pages/`
-Route-level components. `/todo`, `/memo`, and `/profile` routes are login-protected (checked inside each component, not via a router guard).
+Route-level components. Protected routes (`/memo`, `/profile`) are wrapped with `PrivateRoute` in `App.js`.
 
 ### `src/index.css`
-Contains the global dark-theme styles and utility classes used throughout (`.row`, `.col`, `.card`, `.muted`, `.empty`).
+Global dark-theme styles and utility classes (`.row`, `.col`, `.card`, `.muted`, `.empty`).
 
-## Known Issues / Incomplete Areas
+## Session Restoration
 
-- Session restoration on page reload is not implemented — the `useEffect` in `App.js` is empty
-- Token refresh logic in the Axios response interceptor in `Auth.jsx` is incomplete
+On page reload, `App.js` checks localStorage for `tokens` and restores login state to Zustand via `zu_login()`.
