@@ -70,6 +70,8 @@ jobs:
                 IMAGE_NAME=${{secrets.DOCKER_USERNAME}}/my-app
                 TAG=${{github.sha}}
 
+                echo "REACT_APP_API_BASE_URL=${{secrets.REACT_APP_API_BASE_URL}}" > .env.production
+
                 docker build -t $IMAGE_NAME:$TAG .
                 docker push $IMAGE_NAME:$TAG
               # - IMAGE_NAME: DockerHub 저장소 경로 (username/my-app03)
