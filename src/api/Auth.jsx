@@ -28,6 +28,10 @@ export const deleteMember = () =>
 export const updateMember = (member) =>
     api.post('/members/updateMember', member)
 
+// 아이디 중복 확인
+// 응답 : {success:true}=>사용가능 , {success:false}=>중복
+export const checkId = (m_id) =>
+    api.get(`/members/checkId?m_id=${m_id}`)
 
 // 요청 인터셉터 
 api.interceptors.request.use(
