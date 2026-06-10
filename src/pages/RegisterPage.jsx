@@ -133,7 +133,7 @@ export default function RegisterPage(params) {
                 </div>
                 {/* 비밀번호 확인 */}
                 <div className="col" style={{gap: '6px'}}>
-                    <label className="muted" style={{fontSize:'13px'}}><sup style={{fontSize: '6px'}}>** </sup> 비밀번호 확</label>
+                    <label className="muted" style={{fontSize:'13px'}}><sup style={{fontSize: '6px'}}>** </sup> 비밀번호 확인</label>
                     <input type="password" value={pwConfirm} 
                            onChange={(e)=> setPwConfirm(e.target.value)} placeholder="비밀번호를 다시 입력하세요" required />
                     {/*  입력 중 실시간 일치 여부 표시 */}
